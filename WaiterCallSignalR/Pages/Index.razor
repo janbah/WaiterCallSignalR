@@ -1,9 +1,57 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Call</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Send Call</h1>
 
-Welcome to your new app.
+<button class="btn btn-primary" @onclick="Connect">Connect</button>
+<button class="btn btn-primary" @onclick="SendCall">Send Call</button>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+
+    int tableNumber = 10;
+    HubConnection connection;
+    protected override void OnInitialized()
+    {
+        connection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:59748/waiterCallHub")
+            .Build();
+
+        base.OnInitialized();
+    }
+    
+    private async Task SendCall()
+    {
+        try
+        {
+            await connection.InvokeAsync("SendCall", tableNumber);
+            Console.WriteLine("call sent!");
+            tableNumber++;
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("call sending failed!");
+            throw;
+        }
+
+    }
+
+    private async Task Connect()
+    {
+
+        try
+        {
+            await connection.StartAsync();
+            Console.WriteLine("connection established!");
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("connection failed!");
+            Console.WriteLine(e);
+        }
+    }
+
+}

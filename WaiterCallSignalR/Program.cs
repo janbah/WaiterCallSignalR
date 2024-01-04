@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using WaiterCallSignalR.Data;
+using WaiterCallSignalR.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder.AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowAnyOrigin();
+        //.WithOrigins("127.0.0.1:37468","http://10.0.2.2:37468");
+    });
+});
 
 var app = builder.Build();
 
@@ -19,13 +32,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors("CorsPolicy");
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+
+app.MapHub<WaiterCallHub>("/waiterCallHub");
 
 app.Run();
